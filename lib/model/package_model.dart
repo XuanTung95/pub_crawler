@@ -16,4 +16,5 @@ class PackageModel {
   String? lastUpdate; // <span class="-x-ago" title="Jun 24, 2021">7 months ago</span>
   int? lastUpdateTs;
   PackageDetail? detail;
+  String? version;
 }

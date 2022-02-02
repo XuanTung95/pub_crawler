@@ -44,4 +44,12 @@ class AppTextStyle {
   TextStyle get percent {
     return const TextStyle(fontSize: 11, fontWeight: FontWeight.w400, color: Color(0xFF0175c2));
   }
+
+  TextStyle get updateDate {
+    return const TextStyle(fontSize: 12, fontWeight: FontWeight.w400, color: Color(0xFF4a4a4a));
+  }
+
+  TextStyle get version {
+    return const TextStyle(fontSize: 12, fontWeight: FontWeight.w400, color: Color(0xFF0175c2));
+  }
 }

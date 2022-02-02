@@ -23,7 +23,9 @@ class PubParser {
       var width = image.attributes["width"];
       var height = image.attributes["height"];
       if (imageUrl != null && !ImageFilter.shouldIgnoreImage(imageUrl)) {
-        imageUrl = Uri.decodeFull(imageUrl);
+        if (imageUrl.trim().contains(' ')) {
+          imageUrl = Uri.decodeFull(imageUrl);
+        }
         detail.images!.add(PackageImage(url: imageUrl, width: validSize(double.tryParse(width ?? '0')), height: validSize(double.tryParse(height ?? '0'))));
       }
     }
@@ -103,10 +105,16 @@ class PubParser {
         String date = ago.last
             .attributes["title"]!;
         ret.lastUpdate = date;
-        ret.lastUpdateTs = DateUtils.parseDate(date).millisecondsSinceEpoch;
+        ret.lastUpdateTs = DateUtils.parseDate(date)?.millisecondsSinceEpoch;
       } else {
         isCore = true;
       }
+      var version = '';
+      var _version = meta.getElementsByTagName('a');
+      if (_version.isNotEmpty) {
+        version = _version.last.text;
+      }
+      ret.version = version;
     }
     ret.isCore = isCore;
     return ret;

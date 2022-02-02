@@ -70,6 +70,7 @@ class _SortByRowWidgetState extends ConsumerState<SortByRowWidget> {
           Text(' ${state.loadingCount}/${state.totalLoading} ', style: textStyle.countText,),
           ElevatedButton(onPressed: () {
             state.paused = !state.paused;
+            state.lastLoadedCount = 0;
             state.notifyListeners();
           }, child: Text(state.paused ? 'Continue' : 'Pause')),
           Text(' PAGE: ${state.currPage}', style: textStyle.darkBoldText,),

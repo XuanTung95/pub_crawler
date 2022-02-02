@@ -27,6 +27,7 @@ class StatePackageSearch extends ChangeNotifier {
   int totalLoading = 0;
   int loadingCount = 0;
   bool loadFailed = false;
+  int lastLoadedCount = 0;
 
   String _packageType = "packages";
   String _keywords = "";
@@ -76,6 +77,8 @@ class StatePackageSearch extends ChangeNotifier {
     _totalPackages = 0;
     _allPackages = [];
     _sortedPackages = [];
+    totalLoading = 0;
+    loadingCount = 0;
     notifyListeners();
     await _runCrawlerLoop();
   }
@@ -89,17 +92,27 @@ class StatePackageSearch extends ChangeNotifier {
           await Future.delayed(const Duration(seconds: 1));
           return true;
         }
+        if (sig != _sig) {
+          return false;
+        }
         logger.w("Get packages sig: $sig page: $_currPage, keyword: $_keywords sort: $_serverSort");
         String html = await Services.pubClient.getPackagesPage(
           type: _packageType, keywords: _keywords, sort: _serverSort.code, page: _currPage);
         logger.w('html: $html');
-        if (sig != _sig) {
-          return false;
-        }
         await Future.delayed(delay);
         // handle result
         var page = PubParser().parseListPackage(html);
+        if (sig != _sig) {
+          return false;
+        }
         await handlePagePackages(page);
+        if (sig != _sig) {
+          return false;
+        }
+        lastLoadedCount += page.packages.length;
+        if (lastLoadedCount > 2000) {
+          paused = true;
+        }
         _currPage += 1;
         notifyListeners();
         // should keep going or not
@@ -109,6 +122,7 @@ class StatePackageSearch extends ChangeNotifier {
       } catch (e, st) {
         logger.e('${e.toString()}: $st');
         paused = true;
+        notifyListeners();
       }
       if (paused) {
         await Future.delayed(const Duration(seconds: 1));
@@ -137,14 +151,17 @@ class StatePackageSearch extends ChangeNotifier {
     for (var package in page.packages) {
       if (!package.isCore) {
         var detail = await Services.pubClient.getPackagesDetail(package.name!);
-        if (sig != _sig) {
-          return;
-        }
         package.detail = parser.parsePackageDetail(detail);
-        Future.delayed(const Duration(milliseconds: 500));
+        await Future.delayed(const Duration(milliseconds: 500));
+      }
+      if (sig != _sig) {
+        return;
       }
       loadingCount++;
       notifyListeners();
+    }
+    if (sig != _sig) {
+      return;
     }
     _allPackages.addAll(page.packages);
     _totalPackages = page.total;

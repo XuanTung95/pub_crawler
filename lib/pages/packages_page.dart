@@ -55,9 +55,10 @@ class _PackagesPageState extends ConsumerState<PagePackages> {
             SliverList(delegate: SliverChildBuilderDelegate(
                 (BuildContext context, int index) {
                   var package = state.sortedPackages[index];
-                  return Padding(
+                  return Container(
+                    color: index % 2 == 0 ? Colors.transparent : Colors.grey[200],
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                    child: PackageListItem(package: package),
+                    child: PackageListItem(package: package,),
                   );
                 },
               childCount: state.sortedPackages.length,
