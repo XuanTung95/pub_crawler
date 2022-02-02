@@ -115,7 +115,6 @@ class PackageImageView extends StatelessWidget {
         if (image.width != null && image.height != null) {
           height = min(height, image.height!);
           width = height * image.width! / image.height!;
-          print('wh: ${width} ${height}');
         }
         if (image.url.contains(".svg")) {
           return SvgPicture.network(image.url, width: width, height: height,

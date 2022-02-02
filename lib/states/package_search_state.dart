@@ -31,7 +31,7 @@ class StatePackageSearch extends ChangeNotifier {
 
   String _packageType = "packages";
   String _keywords = "";
-  PackageSort _serverSort = Constant.SORT_MOST_LIKES;
+  PackageSort _serverSort = Constant.SORT_NEWEST_PACKAGE;
 
   StatePackageSearch(this.ref);
 
@@ -98,7 +98,6 @@ class StatePackageSearch extends ChangeNotifier {
         logger.w("Get packages sig: $sig page: $_currPage, keyword: $_keywords sort: $_serverSort");
         String html = await Services.pubClient.getPackagesPage(
           type: _packageType, keywords: _keywords, sort: _serverSort.code, page: _currPage);
-        logger.w('html: $html');
         await Future.delayed(delay);
         // handle result
         var page = PubParser().parseListPackage(html);

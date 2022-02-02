@@ -33,7 +33,6 @@ class _PackagesPageState extends ConsumerState<PagePackages> {
 
   @override
   Widget build(BuildContext context) {
-    logger.i("Build Package Page");
     var state = StatePackageSearch.watch(ref);
     return Scaffold(
       body: ScrollConfiguration(

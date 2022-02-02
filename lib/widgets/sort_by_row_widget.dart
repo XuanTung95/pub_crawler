@@ -27,19 +27,20 @@ class _SortByRowWidgetState extends ConsumerState<SortByRowWidget> {
           Text('SORT:', style: textStyle.darkBoldText,),
           ...state.selectedClientSort.map((e) => Container(
             decoration: BoxDecoration(
-              border: Border.all(color: Colors.blue),
+              border: Border.all(color: Colors.grey),
               borderRadius: BorderRadius.circular(7),
             ),
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text(e.name),
+                Text(e.name, style: textStyle.packageNormalText,),
                 InkWell(
                     onTap: () {
                       e.isDesc = !e.isDesc;
                       state.notifySort();
                     },
-                    child: Icon(e.isDesc ? Icons.arrow_downward : Icons.arrow_upward)),
+                    child: Icon(e.isDesc ? Icons.arrow_downward : Icons.arrow_upward, size: 22,)),
               ],
             ),
           )).toList(),
@@ -65,6 +66,7 @@ class _SortByRowWidgetState extends ConsumerState<SortByRowWidget> {
               },
               child: const Icon(Icons.clear, color: Colors.blue,))
         ],),
+        const SizedBox(height: 5,),
         Row(children: [
           Text('LOADING:', style: textStyle.darkBoldText,),
           Text(' ${state.loadingCount}/${state.totalLoading} ', style: textStyle.countText,),
