@@ -1,6 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/adapters.dart';
 import 'package:html/dom.dart' as h;
 import 'package:flutter/material.dart';
 import 'package:pub_dev_crawler/model/package_page.dart';
@@ -9,7 +11,10 @@ import 'package:pub_dev_crawler/services/remote/pub_api.dart';
 import 'package:pub_dev_crawler/widgets/list_item/home_list_item.dart';
 import 'package:html/parser.dart' show parse;
 
-void main() {
+void main() async {
+  await Hive.initFlutter();
+  var box = await Hive.openBox('packages');
+  var box2 = await Hive.openBox('meta');
   runApp(const MyApp());
 }
 

@@ -27,7 +27,8 @@ class _PackagesPageState extends ConsumerState<PagePackages> {
     super.initState();
     WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
       var state = StatePackageSearch.read(ref);
-      state.submitSearch('');
+      state.loadPackagesFromDatabase();
+      state.runSearch();
     });
   }
 

@@ -45,6 +45,8 @@ dependencies:
   url_launcher: ^6.0.18
   extended_image: ^6.0.1
   sliver_tools:
+  hive: ^2.1.0
+  hive_flutter: ^1.1.0
 
 dev_dependencies:
   flutter_test:

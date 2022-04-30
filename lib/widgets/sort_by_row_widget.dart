@@ -1,8 +1,8 @@
 
 
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:pub_dev_crawler/states/package_search_state.dart';
 import 'package:pub_dev_crawler/theme/app_text_style.dart';
 import 'package:pub_dev_crawler/utils/constant.dart';
@@ -75,7 +75,35 @@ class _SortByRowWidgetState extends ConsumerState<SortByRowWidget> {
             state.lastLoadedCount = 0;
             state.notifyListeners();
           }, child: Text(state.paused ? 'Continue' : 'Pause')),
-          Text(' PAGE: ${state.currPage}', style: textStyle.darkBoldText,),
+          SizedBox(width: 10,),
+          Container(
+            color: Colors.grey[300],
+            child: TextButton(onPressed: () {
+              showDialog(context: context, builder: (context) {
+                final textController = TextEditingController();
+                textController.text = state.currPage.toString();
+                return AlertDialog(
+                  title: Text('Set current page and close dialog'),
+                  actions: <Widget>[
+                    TextField(controller: textController, onChanged: (value) {
+                      try {
+                        int _page = int.parse(value);
+                        state.currPage = _page;
+                      } catch (e) {
+
+                      }
+                    },),
+                  ],
+                );
+              });
+            },
+            child: Text(' PAGE: ${state.currPage}', style: textStyle.darkBoldText,)),
+          ),
+          SizedBox(width: 10,),
+          ElevatedButton(onPressed: () async {
+            await Hive.box('packages').clear();
+            await Hive.box('meta').clear();
+          }, child: Text('Clear Database')),
         ],),
         Row(children: [
           Text('RESULTS', style: textStyle.darkBoldText,),

@@ -3,6 +3,7 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive/hive.dart';
 import 'package:logger/logger.dart';
 import 'package:pub_dev_crawler/model/package_model.dart';
 import 'package:pub_dev_crawler/model/package_page.dart';
@@ -22,7 +23,7 @@ class StatePackageSearch extends ChangeNotifier {
   int _sig = DateTime.now().millisecondsSinceEpoch;
   bool _scaning = true;
   bool paused = false;
-  var delay = const Duration(milliseconds: 2000);
+  var delay = const Duration(milliseconds: 1000);
 
   int totalLoading = 0;
   int loadingCount = 0;
@@ -48,6 +49,28 @@ class StatePackageSearch extends ChangeNotifier {
   void setSortType(PackageSort sort){
     _serverSort = sort;
     submitSearch(_keywords);
+  }
+
+
+  set currPage(int value) {
+    _currPage = value;
+    notifyListeners();
+  }
+
+  loadPackagesFromDatabase() {
+    final box = Hive.box('packages');
+    final meta = Hive.box('meta');
+    _currPage = meta.get('currPage', defaultValue: 1);
+    _allPackages.clear();
+    _sortedPackages.clear();
+    final List<Map<String, dynamic>> map = box.values.map((e) {
+      return Map<String, dynamic>.from(e);
+    }).toList();
+    for (var value in map) {
+      _allPackages.add(PackageModel.fromJson(value));
+    }
+    runSort();
+    // _allPackages;
   }
 
   void setClientSort(ClientSort sort){
@@ -83,9 +106,20 @@ class StatePackageSearch extends ChangeNotifier {
     await _runCrawlerLoop();
   }
 
+  Future runSearch() async {
+      _scaning = true;
+      paused = false;
+      _sortedPackages = [];
+      totalLoading = 0;
+      loadingCount = 0;
+      notifyListeners();
+      await _runCrawlerLoop();
+  }
+
   Future<void> _runCrawlerLoop() async {
     _sig = DateTime.now().millisecondsSinceEpoch;
     int sig = _sig;
+    final box = Hive.box('meta');
     await Future.doWhile(() async {
       try {
         if (paused) {
@@ -118,6 +152,7 @@ class StatePackageSearch extends ChangeNotifier {
         if (_scaning && sig == _sig && !paused) {
           return true;
         }
+        box.put('currPage', currPage);
       } catch (e, st) {
         logger.e('${e.toString()}: $st');
         paused = true;
@@ -143,29 +178,26 @@ class StatePackageSearch extends ChangeNotifier {
 
   Future<void> handlePagePackages(PackagePage page) async {
     int sig = _sig;
-    var parser = PubParser();
     totalLoading = page.packages.length;
     loadingCount = 0;
     notifyListeners();
-    for (var package in page.packages) {
-      if (!package.isCore) {
-        var detail = await Services.pubClient.getPackagesDetail(package.name!);
-        package.detail = parser.parsePackageDetail(detail);
-        await Future.delayed(const Duration(milliseconds: 500));
-      }
-      if (sig != _sig) {
-        return;
-      }
-      loadingCount++;
-      notifyListeners();
-    }
+    getEachPackageDetail(page);
     if (sig != _sig) {
       return;
     }
-    _allPackages.addAll(page.packages);
+    await addPackageToList(page);
     _totalPackages = page.total;
     runSort();
     notifyListeners();
+  }
+
+  Future addPackageToList(PackagePage page) async {
+    final box = Hive.box('packages');
+    await Future.forEach<PackageModel>(page.packages, (package) async {
+      await box.put(package.name ?? '', package.toJson());
+      _allPackages.removeWhere((element) => element.name == package.name);
+      _allPackages.add(package);
+    });
   }
 
   void runSort() {
@@ -207,5 +239,24 @@ class StatePackageSearch extends ChangeNotifier {
 
   bool filterPackage(PackageModel package) {
     return true;
+  }
+
+  Future getEachPackageDetail(PackagePage page) async {
+    final box = Hive.box('packages');
+    int sig = _sig;
+    var parser = PubParser();
+    for (var package in page.packages) {
+      if (!package.isCore) {
+        var detail = await Services.pubClient.getPackagesDetail(package.name!);
+        package.detail = parser.parsePackageDetail(detail);
+        await box.put(package.name ?? '', package.toJson());
+        await Future.delayed(const Duration(milliseconds: 1000));
+      }
+      if (sig != _sig) {
+        return;
+      }
+      loadingCount++;
+    }
+    notifyListeners();
   }
 }

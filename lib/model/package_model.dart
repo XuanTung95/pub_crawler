@@ -17,4 +17,38 @@ class PackageModel {
   int? lastUpdateTs;
   PackageDetail? detail;
   String? version;
+
+
+  PackageModel({this.isCore = false, this.name, this.desc, this.like, this.point, this.popularity, this.lastUpdate, this.lastUpdateTs, this.detail, this.version});
+
+  PackageModel.fromJson(Map<String, dynamic> json) {
+    isCore = json['isCore'];
+    name = json['name'];
+    desc = json['desc'];
+    like = json['like'];
+    point = json['point'];
+    popularity = json['popularity'];
+    lastUpdate = json['lastUpdate'];
+    lastUpdateTs = json['lastUpdateTs'];
+    detail = json['detail'] != null ? PackageDetail.fromJson(Map<String, dynamic>.from(json['detail'])) : null;
+    version = json['version'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['isCore'] = this.isCore;
+    data['name'] = this.name;
+    data['desc'] = this.desc;
+    data['like'] = this.like;
+    data['point'] = this.point;
+    data['popularity'] = this.popularity;
+    data['lastUpdate'] = this.lastUpdate;
+    data['lastUpdateTs'] = this.lastUpdateTs;
+    if (this.detail != null) {
+      data['detail'] = this.detail!.toJson();
+    }
+    data['version'] = this.version;
+    return data;
+  }
+
 }
